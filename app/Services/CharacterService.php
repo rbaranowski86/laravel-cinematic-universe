@@ -35,4 +35,10 @@ class CharacterService implements CharacterContract
         $character->delete();
         return $character;
     }
+
+    public function getCharactersByMovie($movieId)
+    {
+        return Character::where('movie_id', $movieId)->get();
+    }
+
 }

@@ -36,12 +36,8 @@ class MovieService implements MovieContract
         return $movie;
     }
 
-    public function getMoviesByUniverse($universeId = null)
+    public function getMoviesByUniverse($universeId)
     {
-        if ($universeId) {
-            return Movie::where('cinematic_universe_id', $universeId)->get();
-        }
-
-        return Movie::all();
+        return Movie::where('cinematic_universe_id', $universeId)->get();
     }
 }

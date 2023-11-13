@@ -7,6 +7,7 @@ use App\Contracts\CharacterContract;
 use App\Http\Requests\StoreCharacterRequest;
 use App\Http\Requests\UpdateCharacterRequest;
 use App\Http\Resources\CharacterResource;
+use Illuminate\Http\Request;
 
 class CharacterController extends Controller
 {
@@ -17,11 +18,19 @@ class CharacterController extends Controller
         $this->characterService = $characterService;
     }
 
-    public function index()
-    {
+public function index(Request $request)
+{
+    $movieId = $request->query('movieId');
+
+    if ($movieId) {
+        $characters = $this->characterService->getCharactersByMovie($movieId);
+    } else {
         $characters = $this->characterService->getAll();
-        return CharacterResource::collection($characters);
     }
+
+    return CharacterResource::collection($characters);
+}
+
 
     public function store(StoreCharacterRequest $request)
     {

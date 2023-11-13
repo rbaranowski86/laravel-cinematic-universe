@@ -64,4 +64,22 @@ class CharacterControllerTest extends TestCase
         $response->assertStatus(204);
         $this->assertDatabaseMissing('characters', ['id' => $character->id]);
     }
+
+    public function test_fetch_characters_by_movie_id()
+    {
+        $movie = Movie::factory()->create();
+        $characters = Character::factory()->count(5)->create(['movie_id' => $movie->id]);
+        $otherCharacters = Character::factory()->count(5)->create(); // Characters not related to the movie
+
+        $response = $this->getJson("/api/characters?movieId={$movie->id}");
+
+        $response->assertOk();
+        $fetchedCharacters = $response->json('data');
+
+        $this->assertCount(5, $fetchedCharacters);
+        foreach ($fetchedCharacters as $fetchedCharacter) {
+            $this->assertEquals($movie->id, $fetchedCharacter['movie_id']);
+        }
+    }
+
 }
