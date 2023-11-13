@@ -35,4 +35,13 @@ class MovieService implements MovieContract
         $movie->delete();
         return $movie;
     }
+
+    public function getMoviesByUniverse($universeId = null)
+    {
+        if ($universeId) {
+            return Movie::where('cinematic_universe_id', $universeId)->get();
+        }
+
+        return Movie::all();
+    }
 }

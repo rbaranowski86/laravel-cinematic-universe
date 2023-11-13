@@ -16,6 +16,7 @@ class MovieResource extends JsonResource
             'boxOfficeEarnings' => $this->boxOfficeEarnings,
             'cinematicUniverse' => new CinematicUniverseResource($this->whenLoaded('cinematicUniverse')),
             'characters' => CharacterResource::collection($this->whenLoaded('characters')),
+            'cinematic_universe_id' => $this->cinematic_universe_id,
         ];
     }
 }

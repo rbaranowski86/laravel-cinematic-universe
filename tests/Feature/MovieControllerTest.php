@@ -64,4 +64,20 @@ class MovieControllerTest extends TestCase
         $response->assertStatus(204);
         $this->assertDatabaseMissing('movies', ['id' => $movie->id]);
     }
+    public function test_fetch_movies_by_universe_id()
+    {
+        $universe = CinematicUniverse::factory()->create();
+        $movies = Movie::factory()->count(5)->create(['cinematic_universe_id' => $universe->id]);
+        $otherMovies = Movie::factory()->count(5)->create(); // Movies not related to the universe
+
+        $response = $this->getJson("/api/movies?universeId={$universe->id}");
+
+        $response->assertOk();
+        $fetchedMovies = $response->json('data');
+
+        $this->assertCount(5, $fetchedMovies);
+        foreach ($fetchedMovies as $fetchedMovie) {
+            $this->assertEquals($universe->id, $fetchedMovie['cinematic_universe_id']);
+        }
+    }
 }

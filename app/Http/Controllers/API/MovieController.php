@@ -7,6 +7,7 @@ use App\Contracts\MovieContract;
 use App\Http\Requests\StoreMovieRequest;
 use App\Http\Requests\UpdateMovieRequest;
 use App\Http\Resources\MovieResource;
+use Illuminate\Http\Request;
 
 class MovieController extends Controller
 {
@@ -17,9 +18,16 @@ class MovieController extends Controller
         $this->movieService = $movieService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $movies = $this->movieService->getAll();
+        $universeId = $request->query('universeId', null);
+
+        if(is_null($universeId)){
+            $movies = $this->movieService->getAll();
+        } else {
+            $movies = $this->movieService->getMoviesByUniverse($universeId);
+        }
+
         return MovieResource::collection($movies);
     }
 

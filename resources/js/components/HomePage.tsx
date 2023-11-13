@@ -15,9 +15,9 @@ const HomePage: React.FC = () => {
 
     useEffect(() => {
         fetchCinematicUniverses()
-            .then(response => {
-                // Extract the data array from the response
-                setUniverses(response.data);
+            .then(universe => {
+                // Assuming the response structure is { data: CinematicUniverse[] }
+                setUniverses(universe); // Adjust based on actual response structure
                 setLoading(false);
             })
             .catch(err => {
