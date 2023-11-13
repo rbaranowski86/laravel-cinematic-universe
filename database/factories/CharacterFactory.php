@@ -20,7 +20,6 @@ class CharacterFactory extends Factory
             'alias' => $this->faker->word,
             'superpowers' => $this->faker->words(3, true),
             'firstAppearance' => $this->faker->word,
-            'movie_id' => Movie::factory()->create()->id,
         ];
     }
 }

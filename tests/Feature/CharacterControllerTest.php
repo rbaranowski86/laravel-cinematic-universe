@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Actor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\Character;
@@ -26,14 +27,21 @@ class CharacterControllerTest extends TestCase
             'alias' => 'New Alias',
             'superpowers' => 'Super strength',
             'firstAppearance' => '2023-01-01',
-            'movie_id' => $movie->id,
+            'movie_ids' => [$movie->id],
         ];
 
         $response = $this->post('/api/characters', $data);
 
         $response->assertStatus(201);
-        $this->assertDatabaseHas('characters', $data);
-    }
+        $character = Character::where('name', 'New Character')->firstOrFail();
+
+        $this->assertNotNull($character);
+        $this->assertEquals('New Character', $character->name);
+        $this->assertEquals('New Alias', $character->alias);
+        $this->assertTrue($character->movies->contains($movie->id));
+}
+
+
 
     public function test_show()
     {
@@ -68,8 +76,14 @@ class CharacterControllerTest extends TestCase
     public function test_fetch_characters_by_movie_id()
     {
         $movie = Movie::factory()->create();
-        $characters = Character::factory()->count(5)->create(['movie_id' => $movie->id]);
-        $otherCharacters = Character::factory()->count(5)->create(); // Characters not related to the movie
+
+        // Create characters and attach them to the movie
+        $characters = Character::factory()->count(5)->create()->each(function ($character) use ($movie) {
+            $character->movies()->attach($movie->id);
+        });
+
+        // Create other characters not related to the movie
+        $otherCharacters = Character::factory()->count(5)->create();
 
         $response = $this->getJson("/api/characters?movieId={$movie->id}");
 
@@ -78,37 +92,45 @@ class CharacterControllerTest extends TestCase
 
         $this->assertCount(5, $fetchedCharacters);
         foreach ($fetchedCharacters as $fetchedCharacter) {
-            $this->assertEquals($movie->id, $fetchedCharacter['movie_id']);
+            // Fetch the character to check its movies
+            $character = Character::where('characters.id', $fetchedCharacter['id'])->firstOrFail(); // specify table name
+            $this->assertTrue($character->movies->contains($movie->id));
         }
     }
 
 
-
     public function test_character_search_functionality()
     {
-        // Create a movie and associated characters
+        // Create a movie
         $movie = Movie::factory()->create();
-        $characters = Character::factory()->count(3)->create(['movie_id' => $movie->id]);
 
-        // Create one character with a specific name to search for
-        $specificCharacter = Character::factory()->create([
-            'movie_id' => $movie->id,
-            'name' => 'UniqueName',
-            'alias' => 'UniqueAlias'
-        ]);
+        // Create characters and attach them to the movie
+        $characters = Character::factory()->count(3)->create()->each(function ($character) use ($movie) {
+            $character->movies()->attach($movie->id);
+        });
 
-        // Case 1: Search by name
+        // Create a specific character and actor
+        $specificCharacter = Character::factory()->create(['name' => 'UniqueName', 'alias' => 'UniqueAlias']);
+        $specificCharacter->movies()->attach($movie->id);
+        $actor = Actor::factory()->create(['character_id' => $specificCharacter->id, 'name' => 'UniqueActorName']);
+
+        // Case 1: Search by character name
         $response = $this->getJson("/api/characters?movieId={$movie->id}&search=UniqueName");
         $response->assertOk();
         $this->assertCount(1, $response->json('data'));
         $this->assertEquals('UniqueName', $response->json('data.0.name'));
 
-        // Case 2: Search by alias
+        // Case 2: Search by character alias
         $response = $this->getJson("/api/characters?movieId={$movie->id}&search=UniqueAlias");
         $response->assertOk();
         $this->assertCount(1, $response->json('data'));
         $this->assertEquals('UniqueAlias', $response->json('data.0.alias'));
 
-        // Add more cases as necessary, e.g., searching by actor name if applicable
+        // Case 3: Search by actor name
+        $response = $this->getJson("/api/characters?movieId={$movie->id}&search=UniqueActorName");
+        $response->assertOk();
+        $this->assertCount(1, $response->json('data'));
+        $this->assertEquals('UniqueActorName', $response->json('data.0.actor.name'));
     }
+
 }

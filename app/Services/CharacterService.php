@@ -19,15 +19,35 @@ class CharacterService implements CharacterContract
 
     public function create(array $attributes)
     {
-        return Character::create($attributes);
+        $movieIds = $attributes['movie_ids'] ?? null;
+        unset($attributes['movie_ids']);
+
+        $character = Character::create($attributes);
+
+        if ($movieIds) {
+            $character->movies()->attach($movieIds);
+        }
+
+        return $character;
     }
+
 
     public function update($id, array $attributes)
     {
         $character = Character::findOrFail($id);
+
+        $movieIds = $attributes['movie_ids'] ?? null;
+        unset($attributes['movie_ids']);
+
         $character->update($attributes);
+
+        if ($movieIds) {
+            $character->movies()->sync($movieIds);
+        }
+
         return $character;
     }
+
 
     public function delete($id)
     {
@@ -38,7 +58,9 @@ class CharacterService implements CharacterContract
 
     public function getCharactersByMovie($movieId)
     {
-        return Character::where('movie_id', $movieId)->get();
+        return Character::whereHas('movies', function ($query) use ($movieId) {
+            $query->where('movies.movie_id', '=', $movieId);
+        })->get();
     }
 
     public function searchCharacters($movieId, $searchTerm)
@@ -46,14 +68,15 @@ class CharacterService implements CharacterContract
         $query = Character::query();
 
         if ($movieId) {
-            $query->where('movie_id', $movieId);
+            $query->whereHas('movies', function ($q) use ($movieId) {
+                $q->where('id', $movieId);
+            });
         }
 
         if (!empty($searchTerm)) {
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', '%' . $searchTerm . '%')
                     ->orWhere('alias', 'like', '%' . $searchTerm . '%')
-                    // Assuming you have a relation with Actor to search by actor name
                     ->orWhereHas('actor', function ($q) use ($searchTerm) {
                         $q->where('name', 'like', '%' . $searchTerm . '%');
                     });
@@ -62,5 +85,6 @@ class CharacterService implements CharacterContract
 
         return $query->get();
     }
+
 
 }

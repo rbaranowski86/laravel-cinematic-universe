@@ -18,7 +18,8 @@ class UpdateCharacterRequest extends FormRequest
             'alias' => 'sometimes|required|string|max:255',
             'superpowers' => 'sometimes|string',
             'firstAppearance' => 'sometimes|required|string|max:255',
-            'movie_id' => 'sometimes|required|exists:movies,id',
+            'movie_ids' => 'sometimes|array',
+            'movie_ids.*' => 'exists:movies,id',
         ];
     }
 }

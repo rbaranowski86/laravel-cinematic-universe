@@ -14,7 +14,7 @@ class CharacterResource extends JsonResource
             'alias' => $this->alias,
             'superpowers' => $this->superpowers,
             'firstAppearance' => $this->firstAppearance,
-            'movie_id' => $this->movie_id,
+            'actor' => new ActorResource($this->actor)
         ];
     }
 }

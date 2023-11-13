@@ -11,9 +11,9 @@ class Character extends Model
 
     protected $fillable = ['name', 'alias', 'superpowers', 'firstAppearance', 'movie_id'];
 
-    public function movie()
+    public function movies()
     {
-        return $this->belongsTo(Movie::class);
+        return $this->belongsToMany(Movie::class);
     }
 
     public function actor()

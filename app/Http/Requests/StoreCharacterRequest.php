@@ -18,7 +18,8 @@ class StoreCharacterRequest extends FormRequest
             'alias' => 'required|string|max:255',
             'superpowers' => 'sometimes|string',
             'firstAppearance' => 'required|string|max:255',
-            'movie_id' => 'required|exists:movies,id',
+            'movie_ids' => 'sometimes|array',
+            'movie_ids.*' => 'exists:movies,id',
         ];
     }
 }

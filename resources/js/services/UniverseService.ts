@@ -78,3 +78,23 @@ export const fetchCharactersByMovie = async (movieId, searchTerm = '') => {
         throw error;
     }
 };
+
+export const deleteUniverse = async (universeId) => {
+    try {
+        const response = await fetch(`/api/cinematic-universes/${universeId}`, { method: 'DELETE' });
+
+        if (response.status === 204) {
+            return 'Universe successfully deleted';
+        }
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error(`Error while deleting universe:`, error);
+        throw error;
+    }
+};
+

@@ -14,11 +14,18 @@ export interface Movie {
     boxOfficeEarnings: number;
 }
 
+export interface Actor {
+    id: number;
+    name: string;
+    dateOfBirth: string | null;
+    nationality: string | null;
+}
+
 export interface Character {
     id: number;
-    movie_id: number;
     name: string;
     alias: string | null;
     superpowers: string | null;
     firstAppearance: string | null;
+    actor: Actor;
 }

@@ -51,7 +51,6 @@ const UniversePage: React.FC = () => {
         <div>
             <h1>{universe?.name}</h1>
             <p>{universe?.description}</p>
-            {/* Additional details about the universe can go here */}
             <TextField
                 label="Filter Movies"
                 variant="outlined"
