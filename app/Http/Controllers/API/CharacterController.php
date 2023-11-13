@@ -18,18 +18,15 @@ class CharacterController extends Controller
         $this->characterService = $characterService;
     }
 
-public function index(Request $request)
-{
-    $movieId = $request->query('movieId');
+    public function index(Request $request)
+    {
+        $movieId = $request->query('movieId');
+        $searchTerm = $request->query('search');
 
-    if ($movieId) {
-        $characters = $this->characterService->getCharactersByMovie($movieId);
-    } else {
-        $characters = $this->characterService->getAll();
+        $characters = $this->characterService->searchCharacters($movieId, $searchTerm);
+
+        return CharacterResource::collection($characters);
     }
-
-    return CharacterResource::collection($characters);
-}
 
 
     public function store(StoreCharacterRequest $request)

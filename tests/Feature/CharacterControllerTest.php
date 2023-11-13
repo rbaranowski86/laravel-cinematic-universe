@@ -82,4 +82,33 @@ class CharacterControllerTest extends TestCase
         }
     }
 
+
+
+    public function test_character_search_functionality()
+    {
+        // Create a movie and associated characters
+        $movie = Movie::factory()->create();
+        $characters = Character::factory()->count(3)->create(['movie_id' => $movie->id]);
+
+        // Create one character with a specific name to search for
+        $specificCharacter = Character::factory()->create([
+            'movie_id' => $movie->id,
+            'name' => 'UniqueName',
+            'alias' => 'UniqueAlias'
+        ]);
+
+        // Case 1: Search by name
+        $response = $this->getJson("/api/characters?movieId={$movie->id}&search=UniqueName");
+        $response->assertOk();
+        $this->assertCount(1, $response->json('data'));
+        $this->assertEquals('UniqueName', $response->json('data.0.name'));
+
+        // Case 2: Search by alias
+        $response = $this->getJson("/api/characters?movieId={$movie->id}&search=UniqueAlias");
+        $response->assertOk();
+        $this->assertCount(1, $response->json('data'));
+        $this->assertEquals('UniqueAlias', $response->json('data.0.alias'));
+
+        // Add more cases as necessary, e.g., searching by actor name if applicable
+    }
 }

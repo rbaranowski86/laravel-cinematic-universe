@@ -59,16 +59,22 @@ export const fetchMovieDetails = async (movieId: number): Promise<Movie> => {
     }
 };
 
-export const fetchCharactersByMovie = async (movieId: number): Promise<Character[]> => {
+export const fetchCharactersByMovie = async (movieId, searchTerm = '') => {
     try {
-        const response = await fetch(`${API_BASE_URL}/characters?movieId=${movieId}`);
+        let url = `/api/characters?movieId=${movieId}`;
+        if (searchTerm.trim() !== '') {
+            url += `&search=${encodeURIComponent(searchTerm)}`;
+        }
+
+        const response = await fetch(url);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
+
         const data = await response.json();
-        return data.data;
+        return data.data; // Adjust based on your API response structure
     } catch (error) {
-        console.error(`Error while fetching characters for movie ${movieId}:`, error);
+        console.error(`Error while fetching characters:`, error);
         throw error;
     }
 };

@@ -41,4 +41,26 @@ class CharacterService implements CharacterContract
         return Character::where('movie_id', $movieId)->get();
     }
 
+    public function searchCharacters($movieId, $searchTerm)
+    {
+        $query = Character::query();
+
+        if ($movieId) {
+            $query->where('movie_id', $movieId);
+        }
+
+        if (!empty($searchTerm)) {
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('alias', 'like', '%' . $searchTerm . '%')
+                    // Assuming you have a relation with Actor to search by actor name
+                    ->orWhereHas('actor', function ($q) use ($searchTerm) {
+                        $q->where('name', 'like', '%' . $searchTerm . '%');
+                    });
+            });
+        }
+
+        return $query->get();
+    }
+
 }

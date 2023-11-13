@@ -64,6 +64,7 @@ class MovieControllerTest extends TestCase
         $response->assertStatus(204);
         $this->assertDatabaseMissing('movies', ['id' => $movie->id]);
     }
+
     public function test_fetch_movies_by_universe_id()
     {
         $universe = CinematicUniverse::factory()->create();
