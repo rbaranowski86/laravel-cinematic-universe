@@ -105,7 +105,7 @@ const HomePage: React.FC = () => {
 
     return (
         <Box>
-            <Button onClick={() => handleOpenDialog()} variant="contained" color="primary">Add Universe</Button>
+            <Button onClick={() => handleOpenDialog()} variant="contained" color="primary" id="add-universe">Add Universe</Button>
             {universes.map(universe => (
                 <Card key={universe.id} variant="outlined" sx={{marginBottom: 2}}>
                     <CardContent>
@@ -130,6 +130,7 @@ const HomePage: React.FC = () => {
                     <TextField
                         autoFocus
                         margin="dense"
+                        id="name"
                         label="Name"
                         type="text"
                         fullWidth
@@ -138,6 +139,7 @@ const HomePage: React.FC = () => {
                     />
                     <TextField
                         margin="dense"
+                        id="description"
                         label="Description"
                         type="text"
                         fullWidth
@@ -146,6 +148,7 @@ const HomePage: React.FC = () => {
                     />
                     <TextField
                         margin="dense"
+                        id="foundation-year"
                         label="Foundation Year"
                         type="number"
                         fullWidth
@@ -157,7 +160,7 @@ const HomePage: React.FC = () => {
                     <Button onClick={handleCloseDialog} color="primary">
                         Cancel
                     </Button>
-                    <Button onClick={handleSubmit} color="primary">
+                    <Button onClick={handleSubmit} color="primary" id="submit-button">
                         {editingUniverse ? 'Edit' : 'Add'}
                     </Button>
                 </DialogActions>
