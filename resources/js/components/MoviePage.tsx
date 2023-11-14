@@ -1,12 +1,25 @@
 import React, {useState, useEffect} from 'react';
 import {useParams} from 'react-router-dom';
-import {TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper} from '@mui/material';
+import {
+    TextField,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    IconButton
+} from '@mui/material';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import {fetchMovieDetails, fetchCharactersByMovie} from '../services/UniverseService';
 import {Movie, Character} from '../types';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import {fetchActorInfoFromWikipedia} from '../services/WikipediaService';
+
 
 const MoviePage: React.FC = () => {
     const {movieId} = useParams<{ movieId: string }>();
@@ -18,6 +31,9 @@ const MoviePage: React.FC = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [selectedActor, setSelectedActor] = useState(null);
     const [actorInfo, setActorInfo] = useState({name: '', image: '', description: ''});
+    const [sortField, setSortField] = useState('name');
+    const [sortDirection, setSortDirection] = useState('asc');
+
 
     useEffect(() => {
         if (movieId) {
@@ -35,7 +51,34 @@ const MoviePage: React.FC = () => {
         }
     }, [movieId]);
 
-    const fetchCharacters = (id, searchTerm) => {
+    const handleSort = (field) => {
+        const isAsc = sortField === field && sortDirection === 'asc';
+        setSortField(field);
+        setSortDirection(isAsc ? 'desc' : 'asc');
+    };
+
+    const sortedCharacters = React.useMemo(() => {
+        return characters.sort((a, b) => {
+            let aValue = a[sortField];
+            let bValue = b[sortField];
+
+            // Check for nested actor property
+            if (sortField === 'actor') {
+                aValue = a.actor?.name || '';
+                bValue = b.actor?.name || '';
+            }
+
+            if (aValue < bValue) {
+                return sortDirection === 'asc' ? -1 : 1;
+            }
+            if (aValue > bValue) {
+                return sortDirection === 'asc' ? 1 : -1;
+            }
+            return 0;
+        });
+    }, [characters, sortField, sortDirection]);
+
+    const fetchCharacters = (id: number, searchTerm: string) => {
         fetchCharactersByMovie(id, searchTerm).then(charactersData => {
             setCharacters(charactersData);
         }).catch(err => {
@@ -97,15 +140,21 @@ const MoviePage: React.FC = () => {
                 <Table aria-label="characters table">
                     <TableHead>
                         <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Alias</TableCell>
-                            <TableCell>Actor</TableCell>
+                            <TableCell onClick={() => handleSort('name')}  style={{cursor: 'pointer'}}>
+                                Name {sortField === 'name' ? (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />) : null}
+                            </TableCell>
+                            <TableCell onClick={() => handleSort('alias')} style={{cursor: 'pointer'}}>
+                                Alias {sortField === 'alias' ? (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />) : null}
+                            </TableCell>
+                            <TableCell onClick={() => handleSort('actor')} style={{cursor: 'pointer'}}>
+                                Actor {sortField === 'actor' ? (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />) : null}
+                            </TableCell>
                             <TableCell>Superpowers</TableCell>
                             <TableCell>First Appearance</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {characters.map((character) => (
+                        {sortedCharacters.map((character) => (
                             <TableRow key={character.id}>
                                 <TableCell>{character.name}</TableCell>
                                 <TableCell>{character.alias || 'N/A'}</TableCell>
