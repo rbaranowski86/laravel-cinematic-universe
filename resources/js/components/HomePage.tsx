@@ -11,7 +11,7 @@ import {
     DialogTitle,
     TextField
 } from '@mui/material';
-import {fetchCinematicUniverses, deleteUniverse} from '../services/UniverseService';
+import {fetchCinematicUniverses, deleteUniverse, addUniverse, editUniverse} from '../services/UniverseService';
 import {CinematicUniverse} from "../types";
 import {Link} from "react-router-dom";
 
@@ -21,6 +21,10 @@ const HomePage: React.FC = () => {
     const [error, setError] = useState('');
     const [openDialog, setOpenDialog] = useState(false);
     const [editingUniverse, setEditingUniverse] = useState<CinematicUniverse | null>(null);
+    const [universeName, setUniverseName] = useState('');
+    const [universeDescription, setUniverseDescription] = useState('');
+    const [universeFoundationYear, setUniverseFoundationYear] = useState('');
+
 
     const loadUniverses = () => {
         setLoading(true);
@@ -42,6 +46,15 @@ const HomePage: React.FC = () => {
 
     const handleOpenDialog = (universe: CinematicUniverse | null = null) => {
         setEditingUniverse(universe);
+        if (universe) {
+            setUniverseName(universe.name);
+            setUniverseDescription(universe.description || '');
+            setUniverseFoundationYear(universe.foundationYear.toString());
+        } else {
+            setUniverseName('');
+            setUniverseDescription('');
+            setUniverseFoundationYear('');
+        }
         setOpenDialog(true);
     };
 
@@ -51,9 +64,31 @@ const HomePage: React.FC = () => {
     };
 
     const handleSubmit = () => {
-        // TODO: Implement Submit functionality
-        handleCloseDialog();
+        const universeData = {
+            name: universeName,
+            description: universeDescription,
+            foundationYear: universeFoundationYear
+        };
+
+        if (editingUniverse) {
+            // Edit existing universe
+            editUniverse(editingUniverse.id, universeData).then(() => {
+                loadUniverses();
+                handleCloseDialog();
+            }).catch(err => {
+                console.error('Error updating universe:', err);
+            });
+        } else {
+            // Add new universe
+            addUniverse(universeData).then(() => {
+                loadUniverses();
+                handleCloseDialog();
+            }).catch(err => {
+                console.error('Error adding universe:', err);
+            });
+        }
     };
+
 
     const handleDelete = (universeId) => {
         deleteUniverse(universeId)
@@ -98,21 +133,24 @@ const HomePage: React.FC = () => {
                         label="Name"
                         type="text"
                         fullWidth
-                        defaultValue={editingUniverse?.name}
+                        value={universeName}
+                        onChange={(e) => setUniverseName(e.target.value)}
                     />
                     <TextField
                         margin="dense"
                         label="Description"
                         type="text"
                         fullWidth
-                        defaultValue={editingUniverse?.description}
+                        value={universeDescription}
+                        onChange={(e) => setUniverseDescription(e.target.value)}
                     />
                     <TextField
                         margin="dense"
                         label="Foundation Year"
                         type="number"
                         fullWidth
-                        defaultValue={editingUniverse?.foundationYear}
+                        value={universeFoundationYear}
+                        onChange={(e) => setUniverseFoundationYear(e.target.value)}
                     />
                 </DialogContent>
                 <DialogActions>

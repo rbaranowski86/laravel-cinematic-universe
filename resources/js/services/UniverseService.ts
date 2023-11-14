@@ -98,3 +98,25 @@ export const deleteUniverse = async (universeId) => {
     }
 };
 
+export const addUniverse = async (universeData: CinematicUniverse) => {
+    const response = await fetch('/api/cinematic-universes', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(universeData),
+    });
+    return response.json();
+};
+
+export const editUniverse = async (universeId: number, universeData: CinematicUniverse) => {
+    const response = await fetch(`/api/cinematic-universes/${universeId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(universeData),
+    });
+    return response.json();
+};
+
