@@ -154,13 +154,57 @@ and update fillables:
 ```php
 protected $fillable = ['title', 'releaseDate', 'director_id', 'boxOfficeEarnings', 'cinematic_universe_id'];
 ```
+
 7. Migrate the data
 ```shell
 sail artisan make:migration move_directors_from_movie_to_director_table
 ```
+and paste:
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use App\Models\Movie;
+use App\Models\Director;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        $movies = Movie::all();
+
+        foreach ($movies as $movie) {
+            // Create or find the director
+            $director = Director::firstOrCreate(['name' => $movie->director]);
+
+            // Update the movie with the director_id
+            $movie->director_id = $director->id;
+            $movie->save();
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+    }
+};
+```
 8. Remove the column
 ```shell
 sail artisan make:migration remove_director_from_movies_table
+```
+and paste:
+```php
+Schema::table('movies', function (Blueprint $table) {
+    $table->dropColumn('director');
+});
 ```
 9. Run the migrations to sort out changes
 ```shell
@@ -242,6 +286,10 @@ class DatabaseSeeder extends Seeder
         $this->call(DirectorSeeder::class);
     }
 }
+```
+also we can correct now Movie Model:
+```php
+protected $fillable = ['title', 'releaseDate', 'director_id', 'boxOfficeEarnings', 'cinematic_universe_id'];
 ```
 And try it out:
 ```shell
