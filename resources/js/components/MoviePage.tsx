@@ -14,7 +14,7 @@ import {
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import {fetchMovieDetails, fetchCharactersByMovie} from '../services/UniverseService';
-import {Movie, Character} from '../types';
+import {Movie, Character, Actor} from '../types';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -29,7 +29,7 @@ const MoviePage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [openDialog, setOpenDialog] = useState(false);
-    const [selectedActor, setSelectedActor] = useState(null);
+    const [selectedActor, setSelectedActor] = useState('');
     const [actorInfo, setActorInfo] = useState({name: '', image: '', description: ''});
     const [sortField, setSortField] = useState('name');
     const [sortDirection, setSortDirection] = useState('asc');
@@ -51,28 +51,38 @@ const MoviePage: React.FC = () => {
         }
     }, [movieId]);
 
-    const handleSort = (field) => {
+    const handleSort = (field:string) => {
         const isAsc = sortField === field && sortDirection === 'asc';
         setSortField(field);
         setSortDirection(isAsc ? 'desc' : 'asc');
     };
 
-    const sortedCharacters = React.useMemo(() => {
-        return characters.sort((a, b) => {
-            let aValue = a[sortField];
-            let bValue = b[sortField];
+    function isKeyOfCharacter(key: any): key is keyof Character {
+        return key === "name" || key === "alias" || key === "actor"
+    }
 
-            // Check for nested actor property
+    const sortedCharacters = React.useMemo(() => {
+        if (!isKeyOfCharacter(sortField)) {
+            console.error("Invalid sort field");
+            return characters;
+        }
+
+        return characters.sort((a, b) => {
+            let aValue: string | number | Actor | null = a[sortField];
+            let bValue: string | number | Actor | null = b[sortField];
+
             if (sortField === 'actor') {
                 aValue = a.actor?.name || '';
                 bValue = b.actor?.name || '';
             }
 
-            if (aValue < bValue) {
-                return sortDirection === 'asc' ? -1 : 1;
-            }
-            if (aValue > bValue) {
-                return sortDirection === 'asc' ? 1 : -1;
+            if(aValue && bValue) {
+                if (aValue < bValue) {
+                    return sortDirection === 'asc' ? -1 : 1;
+                }
+                if (aValue > bValue) {
+                    return sortDirection === 'asc' ? 1 : -1;
+                }
             }
             return 0;
         });
@@ -86,15 +96,16 @@ const MoviePage: React.FC = () => {
         });
     };
 
-    const handleSearchChange = (event) => {
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(event.target.value);
     };
 
     const handleSearch = () => {
+        if(movieId)
         fetchCharacters(parseInt(movieId), searchTerm);
     };
 
-    const handleActorClick = async (actorName) => {
+    const handleActorClick = async (actorName:string) => {
         setOpenDialog(true);
         setSelectedActor(actorName);
         // Fetch actor info from Wikipedia (or another source) and set it in state
@@ -103,7 +114,7 @@ const MoviePage: React.FC = () => {
     };
     const handleCloseDialog = () => {
         setOpenDialog(false);
-        setSelectedActor(null);
+        setSelectedActor('');
         setActorInfo({name: '', image: '', description: ''});
     };
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {ReactNode} from 'react';
 import Header from './Header';
 import Footer from './Footer';
 import Menu from './Menu';
@@ -6,7 +6,10 @@ import { Box, Container, Drawer } from '@mui/material';
 
 const drawerWidth = 240; // Adjust based on your preference
 
-const Layout: React.FC = ({ children }) => {
+interface LayoutProps {
+    children: ReactNode;
+}
+const Layout: React.FC<LayoutProps> = ({ children }) => {
     return (
         <Box sx={{ display: 'flex' }}>
             <Drawer

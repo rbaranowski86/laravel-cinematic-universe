@@ -59,7 +59,7 @@ export const fetchMovieDetails = async (movieId: number): Promise<Movie> => {
     }
 };
 
-export const fetchCharactersByMovie = async (movieId, searchTerm = '') => {
+export const fetchCharactersByMovie = async (movieId:number, searchTerm = '') => {
     try {
         let url = `/api/characters?movieId=${movieId}`;
         if (searchTerm.trim() !== '') {
@@ -79,7 +79,7 @@ export const fetchCharactersByMovie = async (movieId, searchTerm = '') => {
     }
 };
 
-export const deleteUniverse = async (universeId) => {
+export const deleteUniverse = async (universeId:number) => {
     try {
         const response = await fetch(`/api/cinematic-universes/${universeId}`, { method: 'DELETE' });
 

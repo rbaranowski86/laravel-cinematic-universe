@@ -65,12 +65,13 @@ const HomePage: React.FC = () => {
 
     const handleSubmit = () => {
         const universeData = {
+            id: editingUniverse ? editingUniverse.id : undefined,
             name: universeName,
             description: universeDescription,
             foundationYear: universeFoundationYear
         };
 
-        if (editingUniverse) {
+        if (editingUniverse && editingUniverse.id) {
             // Edit existing universe
             editUniverse(editingUniverse.id, universeData).then(() => {
                 loadUniverses();
@@ -90,14 +91,16 @@ const HomePage: React.FC = () => {
     };
 
 
-    const handleDelete = (universeId) => {
-        deleteUniverse(universeId)
-            .then(() => {
-                loadUniverses();
-            })
-            .catch(err => {
-                console.error('Error deleting universe:', err);
-            });
+    const handleDelete = (universeId: number|undefined) => {
+        if(universeId) {
+            deleteUniverse(universeId)
+                .then(() => {
+                    loadUniverses();
+                })
+                .catch(err => {
+                    console.error('Error deleting universe:', err);
+                });
+        }
     };
 
     if (loading) return <div>Loading...</div>;
@@ -127,6 +130,12 @@ const HomePage: React.FC = () => {
             <Dialog open={openDialog} onClose={handleCloseDialog}>
                 <DialogTitle>{editingUniverse ? 'Edit Universe' : 'Add Universe'}</DialogTitle>
                 <DialogContent>
+                    {editingUniverse && (
+                        <input
+                            type="hidden"
+                            value={editingUniverse.id}
+                        />
+                    )}
                     <TextField
                         autoFocus
                         margin="dense"

@@ -1,5 +1,5 @@
 export interface CinematicUniverse {
-    id: number;
+    id: number | undefined;
     name: string;
     description: string | null;
     foundationYear: string;
