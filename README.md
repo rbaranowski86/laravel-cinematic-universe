@@ -103,6 +103,10 @@ Schema::create('directors', function (Blueprint $table) {
         $table->timestamps();
     });
 ```
+and to drop it since is a new table:
+```php
+Schema::dropIfExists('directors');
+```
 3. Create another migration to modify movie table
 ```shell
 sail artisan make:migration modify_movies_table_for_directors
